@@ -3901,7 +3901,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-cors-fetch"
 version = "2.1.1-fix1"
-source = "git+https://github.com/ArthurZhou/tauri-plugin-cors-fetch#b213542337e10b94a6b5241855f03279786b6a06"
+source = "git+https://github.com/idootop/tauri-plugin-cors-fetch#016f2f164226bf4a7f145bc25ad8d01402ffb29c"
 dependencies = [
  "http 0.2.12",
  "once_cell",
