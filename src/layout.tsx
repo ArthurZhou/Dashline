@@ -5,11 +5,12 @@ import { AppSidebar } from "./elements/app-sidebar";
 import { MenuBar } from "./elements/menubar";
 import { Button } from "./components/ui/button";
 import { LucidePause, LucideSkipBack, LucideSkipForward } from "lucide-react";
-import { audio, pause, play } from "./elements/audio";
+import { audio } from "./backend/audio";
+import { pause, play } from "./elements/controls";
 
 function calcCtrlItems() {
   let isMobile = null;
-  
+
   if (typeof window !== "undefined") {
     isMobile = window.innerWidth < 400;
   }
@@ -32,6 +33,10 @@ export default function RootLayout({
           <SidebarProvider>
             <AppSidebar />
             <div className="controls">
+              <div className="progress">
+                <progress value="0" max="100"></progress>
+                <div className="interval"><p className="played"></p><p className="total"></p></div>
+              </div>
               {calcCtrlItems()}
               <div className="ctrls">
                 <Button className="ctrl back"><LucideSkipBack /></Button>

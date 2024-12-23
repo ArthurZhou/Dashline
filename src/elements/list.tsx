@@ -8,19 +8,17 @@ import {
 } from "@/components/ui/table"
 import { keyword } from "./search-box"
 import ReactDOM from "react-dom";
-import { addToPlaylist } from "./audio";
+import { addToPlaylist } from "../backend/audio";
 
 
 export function SearchList() {
-    const listArea = document.getElementById('searchArea');
-
     if (keyword != undefined) {
         fetch(`https://music.163.com/api/search/get?s=${keyword}&type=1&offset=0&limit=50`)
             .then((response) => response.json())
             .then((responseJson) => {
                 ReactDOM.render(
                     ListResults(responseJson.result?.songs),
-                    listArea
+                    document.getElementById('searchArea')
                 )
             })
     }

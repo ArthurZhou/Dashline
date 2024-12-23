@@ -4,6 +4,12 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  user-select: none;
+}
+
+@font-face {
+  font-family: "CatV";
+  src: url(./assets/CatV.ttf);
 }
 
 @layer utilities {
@@ -48,7 +54,10 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     --panel-background: #e9e9e9ae;
+    --black: #000;
+    --white: #fff;
   }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -83,6 +92,8 @@ body {
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     --panel-background: #232323ae;
+    --black: #fff;
+    --white: #000;
   }
 }
 
@@ -90,6 +101,7 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -120,8 +132,10 @@ body {
   float: left;
   display: flex;
   position: fixed;
-  justify-content: center; /* Centers child horizontally */
-  align-items: center; /* Centers child vertically */
+  justify-content: center;
+  /* Centers child horizontally */
+  align-items: center;
+  /* Centers child vertically */
   bottom: 5vh;
   left: 15%;
   width: 70%;
@@ -149,6 +163,7 @@ body {
 .controls>.ctrls {
   align-self: center;
   margin: auto;
+  z-index: 999;
 }
 
 .controls>.ctrls>.ctrl {
@@ -157,4 +172,58 @@ body {
   border: 0px;
   color: var(--foreground);
   box-shadow: none;
+  z-index: 999;
+}
+
+.progress {
+  z-index: 0;
+  display: flex;
+  position: absolute;
+  width: 100%;
+}
+
+.progress>progress {
+  position: relative;
+  width: 100%;
+  height: 13px;
+  margin-bottom: 61px;
+  background: #7a7a7aae;
+  border: 0px;
+  color: var(--black);
+  backdrop-filter: blur(3px);
+}
+
+.progress>progress::-webkit-progress-bar {
+  background-color: #7a7a7aae;
+  backdrop-filter: blur(3px);
+}
+
+.progress>progress::-webkit-progress-value {
+  background-color: var(--black);
+  -webkit-transition: width 0.1s ease;
+  -moz-transition: width 0.1s ease;
+  -o-transition: width 0.1s ease;
+  transition: width 0.1s ease;
+}
+
+.progress>.interval {
+  font-family: 'CatV';
+  font-size: small;
+  position: absolute;
+  margin-left: 3px;
+  bottom: calc(10% + 50px);
+  width: 100%;
+  height: 19px;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  pointer-events: none;
+  color: var(--white);
+}
+
+.progress>.interval>.total {
+  float: right;
+  margin-right: 6px;
 }
