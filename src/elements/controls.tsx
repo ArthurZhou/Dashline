@@ -1,4 +1,4 @@
-import { audio, playing, playlist, turnToPlaylist } from "../backend/audio"
+import { audio, next, playing, playlist, turnToPlaylist } from "../backend/audio"
 import { LucidePause, LucidePlay } from "lucide-react"
 import * as log from "../lib/logger"
 import { createRoot } from "react-dom/client"
@@ -57,6 +57,7 @@ function startProgress(duration: number) {
         if (Math.ceil(duration * 10) / 10 == Math.ceil(audio.currentTime * 10) / 10 && audio.paused == false) { // when playback finished
             pause()
             window.clearInterval(ctrlUpdate)
+            next()
         }
     }, 100) // update frequently
 }
@@ -147,17 +148,40 @@ export function pause() {
 }
 
 export function showPlaylist() {
-    if (playlistElm == undefined) {
-        playlistElm = document.querySelector('.playlist')
-        playlistElm.style.height = "0px"
-        playlistElm.style.padding = "0px"
+    if (playlistElm == undefined) initPlaylist()
+    else {
+        if (playlistElm.style.height == "70%") {
+            playlistElm.style.height = "0px"
+            playlistElm.style.padding = "0px"
+        }
+        else if (playlistElm.style.height == "0px") {
+            playlistElm.style.height = "70%"
+            playlistElm.style.padding = "10px"
+        }
     }
-    if (playlistElm.style.height == "70%") {
-        playlistElm.style.height = "0px"
-        playlistElm.style.padding = "0px"
-    }
-    else if (playlistElm.style.height == "0px") {
-        playlistElm.style.height = "70%"
-        playlistElm.style.padding = "10px"
-    }
+}
+
+function initPlaylist() {
+    let mouseOverList = false
+    let mouseOverBtn = true
+
+    playlistElm = document.querySelector('.playlist')
+    playlistElm.style.height = "70%"
+    playlistElm.style.padding = "10px"
+
+    playlistElm.addEventListener('mouseover', function () {
+        mouseOverList = true
+    })
+    playlistElm.addEventListener('mouseleave', function () {
+        mouseOverList = false
+    })
+    document.querySelector('.playlist-btn')?.addEventListener('mouseover', function () {
+        mouseOverBtn = true
+    })
+    document.querySelector('.playlist-btn')?.addEventListener('mouseleave', function () {
+        mouseOverBtn = false
+    })
+    window.addEventListener('click', function () {
+        if (!mouseOverList && !mouseOverBtn && playlistElm.style.height == "70%") showPlaylist()
+    });
 }
