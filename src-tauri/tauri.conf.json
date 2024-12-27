@@ -15,7 +15,10 @@
       {
         "title": "dashline",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "resizable": true,
+        "minWidth": 300,
+        "minHeight": 500
       }
     ],
     "security": {
@@ -28,7 +31,6 @@
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
-      "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
     ]

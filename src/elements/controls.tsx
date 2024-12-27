@@ -1,59 +1,91 @@
-import ReactDOM from "react-dom"
-import { audio } from "../backend/audio"
+import { audio, playing, playlist, turnToPlaylist } from "../backend/audio"
 import { LucidePause, LucidePlay } from "lucide-react"
+import * as log from "../lib/logger"
+import { createRoot } from "react-dom/client"
+import { v4 as uuid } from 'uuid'
+import "../css/controls.css"
 
-let mouseDown: boolean
+let mouseDown = false
 let mouseX: number
 let ctrlReady = false
+let playlistDOM: any
+let playlistElm: any
 let progress: HTMLProgressElement // progress bar
+let cover: any
+let detailsDOM: any
+let pauseBtn: any
 
 
 function getMMSS(seconds: number) { // convert seconds to HH:MM:SS
-    const minute = Math.floor(seconds/60)
-    const second = Math.floor(seconds-minute*60)
-    return minute.toString().padStart(2, "0")+":"+second.toString().padStart(2, "0");
-}
-
-function getSeconds(timeTxt: string) { // 
-    let slice1 = timeTxt.split(':')
-    let slice2 = slice1[1].split('.')
-    return (parseInt(slice1[0])) * 60 + (parseInt(slice2[0])) + (parseInt(slice2[1])) / 100;
+    const minute = Math.floor(seconds / 60)
+    const second = Math.floor(seconds - minute * 60)
+    return minute.toString().padStart(2, "0") + ":" + second.toString().padStart(2, "0");
 }
 
 export function startCtrl(id: number) {
+    log.info(`start music: ${id}`)
+    if (cover == undefined) cover = createRoot(document.getElementsByClassName('cover')[0] as HTMLElement)
+    if (detailsDOM == undefined) detailsDOM = createRoot(document.getElementsByClassName("details")[0])
     if (!ctrlReady) {
+        log.debug("ctrls not ready yet")
         progress = document.querySelector('.progress')?.children[0] as HTMLProgressElement
-        initCtrl()
+        initProgress()
     }
+    log.debug("fetching music info")
     fetch(`https://music.163.com/api/song/detail?ids=[${id}]`)
         .then((response) => response.json())
-        .then((responseJson) => {
-            ReactDOM.render(
-                <img src={responseJson.songs[0].album.picUrl} />,
-                document.getElementsByClassName('cover')[0]
-            )
-            const duration = (responseJson.songs[0].duration)/1000
-            initProgress(duration)
+        .then((responseJson: { songs: any[] }) => {
+            let result = responseJson.songs[0]
+            cover.render(<img loading="eager" src={result.album.picUrl} />)
+            detailsDOM.render(<h1>{result.name}</h1>)
+            const duration = (result.duration) / 1000
+            log.info(`music: ${result.name}  duration: ${duration}  cover_url: ${result.album.picUrl}`)
+            startProgress(duration)
         })
 }
 
-function initProgress(duration: number) {
+function startProgress(duration: number) {
+    log.debug("starting progressbar")
     // progress
     progress.max = duration // max value of progress bar == audio duration
     document.querySelector('.total')!.innerHTML = getMMSS(duration) // human readable duration under progress bar
     const ctrlUpdate = setInterval(() => {
-        if (mouseDown == false) { // if progress bar has not been dragged manually
+        if (!mouseDown) { // if progress bar has not been dragged manually
             progress.value = audio.currentTime // progress bar value == current time of audio
         }
         document.querySelector('.played')!.innerHTML = getMMSS(audio.currentTime) // humanreadable play time under bar
-        if (Math.ceil(duration*10)/10 == Math.ceil(audio.currentTime*10)/10 && audio.paused == false) { // when playback finished
+        if (Math.ceil(duration * 10) / 10 == Math.ceil(audio.currentTime * 10) / 10 && audio.paused == false) { // when playback finished
             pause()
             window.clearInterval(ctrlUpdate)
         }
     }, 100) // update frequently
 }
 
-export function initCtrl() {
+export function refreshPlaylist() {
+    if (playlistDOM == undefined) playlistDOM = createRoot(document.querySelector('.playlist') as HTMLElement)
+    let list = []
+
+    for (let index = 0; index < playlist.length; index++) {
+        const result: any = playlist[index]
+        const id = uuid()
+        let highlighted = ""
+        if (index == playing) highlighted = "highlight"
+        list.push(<li id={id} onDoubleClick={(event: any) => {
+            const allSongs = document.querySelectorAll(".song-in-list")
+            for (let index = 0; index < allSongs.length; index++) {
+                const song: any = allSongs[index]
+                if (song.id == event.target.id) turnToPlaylist(index)
+            }
+        }} className={highlighted+" "+"song-in-list"} key={id}>{result.name}</li>)
+    }
+
+    playlistDOM.render(<ul>{list}</ul>)
+}
+
+export function initProgress() {
+    log.debug("init progress bar")
+
+    // progress bar
     window.addEventListener('mousemove', function (event) { // return x coordinate of the mouse
         mouseX = event.clientX;
     });
@@ -82,6 +114,7 @@ export function initCtrl() {
 
     setInterval(dragBar, 100)
     ctrlReady = true
+    log.debug("ctrls ready")
 }
 
 function dragBar() { // handle drag progress bar event
@@ -94,21 +127,37 @@ function dragBar() { // handle drag progress bar event
 }
 
 export function play() {
-    console.log("Playback started")
-    if (audio.src !== "http://none/") {
-        ReactDOM.render(
-            <LucidePlay />,
-            document.getElementsByClassName("pause")[0]
-        )
+    if (pauseBtn == undefined) {
+        pauseBtn = createRoot(document.getElementsByClassName("pause")[0])
+    }
+    log.info("playback started")
+    if (audio.src != undefined) {
+        pauseBtn.render(<LucidePause />)
         audio.play()
     }
 }
 
 export function pause() {
-    console.log("Playback paused")
+    if (pauseBtn == undefined) {
+        pauseBtn = createRoot(document.getElementsByClassName("pause")[0])
+    }
+    log.info("playback paused")
     audio.pause()
-    ReactDOM.render(
-        <LucidePause />,
-        document.getElementsByClassName("pause")[0]
-    )
+    pauseBtn.render(<LucidePlay />)
+}
+
+export function showPlaylist() {
+    if (playlistElm == undefined) {
+        playlistElm = document.querySelector('.playlist')
+        playlistElm.style.height = "0px"
+        playlistElm.style.padding = "0px"
+    }
+    if (playlistElm.style.height == "70%") {
+        playlistElm.style.height = "0px"
+        playlistElm.style.padding = "0px"
+    }
+    else if (playlistElm.style.height == "0px") {
+        playlistElm.style.height = "70%"
+        playlistElm.style.padding = "10px"
+    }
 }

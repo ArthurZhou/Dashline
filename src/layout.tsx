@@ -1,62 +1,59 @@
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarProvider } from "@/components/ui/sidebar"
-import "./globals.css";
-import { AppSidebar } from "./elements/app-sidebar";
-import { MenuBar } from "./elements/menubar";
-import { Button } from "./components/ui/button";
-import { LucidePause, LucideSkipBack, LucideSkipForward } from "lucide-react";
-import { audio } from "./backend/audio";
-import { pause, play } from "./elements/controls";
-
-function calcCtrlItems() {
-  let isMobile = null;
-
-  if (typeof window !== "undefined") {
-    isMobile = window.innerWidth < 400;
-  }
-  if (!isMobile) {
-    return (<><div className="cover"></div><div className="details"><h1>Not playing</h1></div></>)
-  } else {
-    return (<></>)
-  }
-}
+import "./css/globals.css"
+import { AppSidebar } from "./elements/app-sidebar"
+import { MenuBar } from "./elements/menubar"
+import { Button } from "./components/ui/button"
+import { LucideList, LucidePause, LucideSkipBack, LucideSkipForward } from "lucide-react"
+import { audio, next, previous } from "./backend/audio"
+import { pause, play, showPlaylist } from "./elements/controls"
+import { useState } from "react"
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body>
-        <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-          <SidebarProvider>
-            <AppSidebar />
-            <div className="controls">
-              <div className="progress">
-                <progress value="0" max="100"></progress>
-                <div className="interval"><p className="played"></p><p className="total"></p></div>
-              </div>
-              {calcCtrlItems()}
-              <div className="ctrls">
-                <Button className="ctrl back"><LucideSkipBack /></Button>
-                <Button className="ctrl pause" onClick={() => {
-                  if (audio.paused) {
-                    play()
-                  } else {
-                    pause()
-                  }
-                }}><LucidePause /></Button>
-                <Button className="ctrl forward"><LucideSkipForward /></Button>
-              </div>
-            </div>
-            <main style={{ width: "100%", height: "100%", overflow: "hidden" }}>
-              <MenuBar />
-              {children} {/* Here is the page content */}
-            </main>
-          </SidebarProvider>
-        </ThemeProvider>
-      </body>
-    </html>
-  );
+	let [ctrlInfoVis, setCtrlInfoVis] = useState(false)
+	setInterval(() => {
+		if (window != undefined) {
+			const isMobile = window.innerWidth < 450
+			if (isMobile && !ctrlInfoVis) {
+				setCtrlInfoVis(true)
+			} else if (!isMobile && ctrlInfoVis) {
+				setCtrlInfoVis(false)
+			}
+		}
+	}, 100);
+	return (
+		<ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+			<SidebarProvider>
+				<AppSidebar />
+				<div className="controls">
+					<div className="progress">
+						<progress value="0" max="100"></progress>
+						<div className="interval"><p className="played"></p><p className="total"></p></div>
+					</div>
+					<><div className="cover" hidden={ctrlInfoVis}></div><div className="details" hidden={ctrlInfoVis}><h1>Not playing</h1></div></>
+					<div className="ctrls">
+						<Button className="ctrl back" onClick={previous}><LucideSkipBack /></Button>
+						<Button className="ctrl pause" onClick={() => {
+							if (audio != undefined) if (audio.paused) {
+								play()
+							} else {
+								pause()
+							}
+						}}><LucidePause /></Button>
+						<Button className="ctrl forward" onClick={next}><LucideSkipForward /></Button>
+					</div>
+					<Button className="ctrl playlist-btn" onClick={showPlaylist}><LucideList /></Button>
+				</div>
+				<div className="playlist"></div>
+				<main style={{ width: "100%", height: "100%", overflow: "hidden" }}>
+					<MenuBar />
+					{children} {/* Here is the page content */}
+				</main>
+			</SidebarProvider>
+		</ThemeProvider>
+	);
 }

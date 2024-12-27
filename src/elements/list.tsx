@@ -7,26 +7,29 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { keyword } from "./search-box"
-import ReactDOM from "react-dom";
-import { addToPlaylist } from "../backend/audio";
+import { createRoot } from 'react-dom/client'
+import { addToPlaylist } from "../backend/audio"
+import * as log from "../lib/logger"
 
+let searchArea: any;
 
 export function SearchList() {
+    if (searchArea == undefined) {
+        searchArea = createRoot(document.getElementById('searchArea') as HTMLElement)
+    }
     if (keyword != undefined) {
+        log.info(`searching: ${keyword}`)
         fetch(`https://music.163.com/api/search/get?s=${keyword}&type=1&offset=0&limit=50`)
             .then((response) => response.json())
             .then((responseJson) => {
-                ReactDOM.render(
-                    ListResults(responseJson.result?.songs),
-                    document.getElementById('searchArea')
-                )
+                searchArea.render(ListResults(responseJson.result?.songs))
             })
     }
 }
 
 function compressName(name: string) {
-    if (name.length>=15) {
-        return name.substring(0,12)+"..."
+    if (name.length >= 15) {
+        return name.substring(0, 12) + "..."
     } else {
         return name
     }
@@ -34,10 +37,11 @@ function compressName(name: string) {
 
 export function ListResults(results: any) {
     let list = []
+
     for (let index = 0; index < results.length; index++) {
         const result = results[index]
         list.push(<TableRow key={result.id} onDoubleClick={() => addToPlaylist(result, true)}>
-            <TableCell className="font-bold">{compressName(result.name)}<br/><small>{ListArtists(result.artists)}</small></TableCell>
+            <TableCell className="font-bold">{compressName(result.name)}<br /><small>{ListArtists(result.artists)}</small></TableCell>
             <TableCell>{msToTime(result.duration)}</TableCell>
         </TableRow>)
     }
@@ -87,6 +91,6 @@ function ListArtists(artists: []) {
             artistsText.push("...")
             break
         }
-    } 
+    }
     return artistsText
 }
