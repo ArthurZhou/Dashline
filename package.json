@@ -4,11 +4,11 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
+    "build": "tauri build",
+    "check": "tsc",
     "tauri": "tauri",
-    "start": "tauri dev"
+    "start": "tauri dev",
+    "android": "tauri android"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.4",

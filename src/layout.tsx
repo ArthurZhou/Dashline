@@ -1,13 +1,14 @@
+import { useState } from "react"
+import { LucideList, LucidePause, LucideSkipBack, LucideSkipForward } from "lucide-react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarProvider } from "@/components/ui/sidebar"
-import "./css/globals.css"
-import { AppSidebar } from "./elements/app-sidebar"
-import { MenuBar } from "./elements/menubar"
-import { Button } from "./components/ui/button"
-import { LucideList, LucidePause, LucideSkipBack, LucideSkipForward } from "lucide-react"
-import { audio, next, previous } from "./backend/audio"
-import { pause, play, showPlaylist } from "./elements/controls"
-import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { AppSidebar } from "@/elements/sidebar"
+import { MenuBar } from "@/elements/menubar"
+import { pause, play, showPlaylist } from "@/elements/controls"
+import { audio, next, previous } from "@/backend/audio"
+import "@/css/globals.css"
+
 
 export default function RootLayout({
 	children,
@@ -15,7 +16,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	let [ctrlInfoVis, setCtrlInfoVis] = useState(false)
-	setInterval(() => {
+	setInterval(() => { // check if the viewport is to narrow
 		if (window != undefined) {
 			const isMobile = window.innerWidth < 450
 			if (isMobile && !ctrlInfoVis) {

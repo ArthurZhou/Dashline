@@ -1,11 +1,11 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "dashline",
+  "productName": "Dashline",
   "version": "0.1.0",
   "identifier": "com.d2lib.dashline",
   "build": {
-    "beforeDevCommand": "pnpm dev",
-    "beforeBuildCommand": "pnpm build",
+    "beforeDevCommand": "pnpm vite",
+    "beforeBuildCommand": "pnpm tsc && pnpm vite build",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"
   },
