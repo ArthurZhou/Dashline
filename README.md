@@ -4,8 +4,8 @@
 
 A Netease music player. Written in React+Shadcn and Tauri
 
-
 ## Development
+
 ```shell
 # install dependencies
 pnpm install
@@ -14,9 +14,9 @@ pnpm install
 pnpm start
 
 # build for current platform
-pnpm tauri build
+pnpm build
 
 # build for android
-pnpm tauri android build
+pnpm android build
 
 ```
