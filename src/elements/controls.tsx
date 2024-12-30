@@ -83,6 +83,7 @@ export function initProgress() {
 	log.debug("init progress bar")
 
 	// progress bar
+	// mouse-based progress bar dragging
 	window.addEventListener('mousemove', function (event) { // return x coordinate of the mouse
 		mouseX = event.clientX;
 	});
@@ -107,6 +108,22 @@ export function initProgress() {
 			mouseDown = false
 			audio.currentTime = progress.value
 		}
+	})
+
+
+	// touch-based progress bar dragging
+	progress.addEventListener('touchstart', function (event) {
+		mouseX = event.touches[0].clientX
+		mouseDown = true
+	})
+
+	progress.addEventListener('touchmove', function (event) {
+		mouseX = event.touches[0].clientX
+	})
+
+	progress.addEventListener('touchend', function () {
+		mouseDown = false
+		audio.currentTime = progress.value
 	})
 
 	setInterval(dragBar, 100)
