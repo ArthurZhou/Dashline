@@ -6,6 +6,9 @@
   "permissions": [
     "core:default",
     "opener:default",
-    "cors-fetch:default"
+    {
+      "identifier": "cors-fetch:default",
+      "allow": [{"url": "http://**"}]
+    }
   ]
 }
