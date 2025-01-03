@@ -174,7 +174,9 @@ export function showPlaylist() {
 	}
 }
 
-function initPlaylist() {
+export function initPlaylist() {
+	log.debug("init playlist")
+
 	let mouseOverList = false
 	let mouseOverBtn = true
 
