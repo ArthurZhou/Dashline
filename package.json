@@ -11,6 +11,7 @@
     "android": "tauri android"
   },
   "dependencies": {
+    "@radix-ui/react-context-menu": "^2.2.4",
     "@radix-ui/react-dialog": "^1.1.4",
     "@radix-ui/react-dropdown-menu": "^2.1.4",
     "@radix-ui/react-menubar": "^1.1.4",

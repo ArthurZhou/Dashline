@@ -1,0 +1,13 @@
+.add-song {
+    height: 20px !important;
+	width: 20px !important;
+	margin-right: 5px !important;
+	align-items: center !important;
+	color: var(--black) !important;
+	background-color: #00000000 !important;
+	box-shadow: none !important;
+}
+
+.add-song:hover {
+	background-color: #00000000 !important;
+}

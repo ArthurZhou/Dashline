@@ -1,12 +1,13 @@
-import ReactDOM from "react-dom/client";
+import { createRoot, Root } from "react-dom/client";
 import { useState } from "react"
-import { LucideList, LucidePause, LucideSkipBack, LucideSkipForward } from "lucide-react"
+import { LucideListMusic, LucidePlay, LucideSkipBack, LucideSkipForward } from "lucide-react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { AppSidebar } from "@/elements/sidebar"
 import { MenuBar } from "@/elements/menubar"
-import { pause, play, showPlaylist } from "@/elements/controls"
+import { pause, play } from "@/elements/controls"
+import { showPlaylist } from "./elements/playlist";
 import { audio, next, previous } from "@/backend/audio"
 import Home from "@/page";
 import "@/css/globals.css"
@@ -27,10 +28,11 @@ function RenderLayout({ }) {
 	return (
 		<ThemeProvider defaultTheme="system" storageKey="vite-ui-theme"><SidebarProvider>
 			<AppSidebar />
+			
 			<div className="controls">
 				<div className="progress">
 					<progress value="0" max="100"></progress>
-					<div className="interval"><p className="played"></p><p className="total"></p></div>
+					<div className="interval"><p className="played">--:--</p><p className="total">--:--</p></div>
 				</div>
 				<div className="cover" hidden={ctrlInfoVis}></div>
 				<div className="details" hidden={ctrlInfoVis}><h1>Not playing</h1></div>
@@ -38,12 +40,13 @@ function RenderLayout({ }) {
 					<Button className="ctrl back" onClick={previous}><LucideSkipBack /></Button>
 					<Button className="ctrl pause" onClick={() => {
 						if (audio != undefined) { if (audio.paused) play(); else pause() }
-					}}><LucidePause /></Button>
+					}}><LucidePlay /></Button>
 					<Button className="ctrl forward" onClick={next}><LucideSkipForward /></Button>
 				</div>
-				<Button className="playlist-btn" onClick={showPlaylist}><LucideList /></Button>
+				<Button className="ctrl playlist-btn" onClick={showPlaylist}><LucideListMusic /></Button>
 			</div>
 			<div className="playlist"></div>
+
 			<main style={{ width: "100%", height: "100%", overflow: "hidden" }}>
 				<MenuBar />
 				<div id="children"><Home /></div> {/* Here is the page content */}
@@ -52,13 +55,13 @@ function RenderLayout({ }) {
 	);
 }
 
-let children: ReactDOM.Root
+let children: Root
 export function show(content: JSX.Element = <Home />) {
-	if (children == undefined) children = ReactDOM.createRoot(document.getElementById("children") as HTMLElement)
+	if (children == undefined) children = createRoot(document.getElementById("children") as HTMLElement)
 	children.render(content)
 }
 
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+createRoot(document.getElementById("root") as HTMLElement).render(
 	<RenderLayout />
 );

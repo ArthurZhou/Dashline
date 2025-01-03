@@ -1,27 +1,25 @@
-import { createRoot } from "react-dom/client"
+import { createRoot, Root } from "react-dom/client"
 import { LucidePause, LucidePlay } from "lucide-react"
-import { v4 as uuid } from 'uuid'
 import { getMMSS } from "@/lib/utils"
 import * as log from "@/lib/logger"
 import { listArtists } from "@/elements/search-list"
-import { audio, next, playing, playlist, turnToPlaylist } from "@/backend/audio"
+import { audio, next } from "@/backend/audio"
 import "@/css/controls.css"
 
 
 let mouseDown = false
 let mouseX: number
 let ctrlReady = false
-let playlistDOM: any
-let playlistElm: any
 let progress: HTMLProgressElement // progress bar
-let cover: any
-let detailsDOM: any
-let pauseBtn: any
+let cover: Root
+let detailsRoot: Root
+let pauseBtn: Root
+let ctrlUpdate: any
 
 export function startCtrl(id: number) {
 	log.info(`start music: ${id}`)
 	if (cover == undefined) cover = createRoot(document.getElementsByClassName('cover')[0] as HTMLElement)
-	if (detailsDOM == undefined) detailsDOM = createRoot(document.getElementsByClassName("details")[0])
+	if (detailsRoot == undefined) detailsRoot = createRoot(document.getElementsByClassName("details")[0])
 	if (!ctrlReady) {
 		log.debug("ctrls not ready yet")
 		progress = document.querySelector('.progress')?.children[0] as HTMLProgressElement
@@ -33,19 +31,32 @@ export function startCtrl(id: number) {
 		.then((responseJson: { songs: any[] }) => {
 			let result = responseJson.songs[0]
 			cover.render(<img loading="eager" src={result.album.picUrl} />)
-			detailsDOM.render(<><h1>{result.name}</h1><small>{listArtists(result.artists)}</small></>)
+			detailsRoot.render(<><h1>{result.name}</h1><small>{listArtists(result.artists)}</small></>)
 			const duration = (result.duration) / 1000
 			log.info(`music: ${result.name}  duration: ${duration}  cover_url: ${result.album.picUrl}`)
 			startProgress(duration)
 		})
 }
 
+export function clearCtrlDetails() {
+	try {
+		cover.render(<></>)
+		detailsRoot.render(<h1>Not Playing</h1>)
+		window.clearInterval(ctrlUpdate)
+		progress.max = 100
+		progress.value = 0
+		document.querySelector('.total')!.innerHTML = "--:--"
+		document.querySelector('.played')!.innerHTML = "--:--"
+	} catch (_) { }
+}
+
 function startProgress(duration: number) {
 	log.debug("starting progressbar")
+	window.clearInterval(ctrlUpdate)
 	// progress
 	progress.max = duration // max value of progress bar == audio duration
 	document.querySelector('.total')!.innerHTML = getMMSS(duration) // human readable duration under progress bar
-	const ctrlUpdate = setInterval(() => {
+	ctrlUpdate = setInterval(() => {
 		if (!mouseDown) { // if progress bar has not been dragged manually
 			progress.value = audio.currentTime // progress bar value == current time of audio
 		}
@@ -58,28 +69,7 @@ function startProgress(duration: number) {
 	}, 100) // update frequently
 }
 
-export function refreshPlaylist() {
-	if (playlistDOM == undefined) playlistDOM = createRoot(document.querySelector('.playlist') as HTMLElement)
-	let list = []
-
-	for (let index = 0; index < playlist.length; index++) {
-		const result: any = playlist[index]
-		const id = uuid()
-		let highlighted = ""
-		if (index == playing) highlighted = "highlight"
-		list.push(<li id={id} onDoubleClick={(event: any) => {
-			const allSongs = document.querySelectorAll(".song-in-list")
-			for (let index = 0; index < allSongs.length; index++) {
-				const song: any = allSongs[index]
-				if (song.id == event.target.id) turnToPlaylist(index)
-			}
-		}} className={highlighted + " " + "song-in-list"} key={id}>{result.name}</li>)
-	}
-
-	playlistDOM.render(<ul>{list}</ul>)
-}
-
-export function initProgress() {
+function initProgress() {
 	log.debug("init progress bar")
 
 	// progress bar
@@ -102,14 +92,12 @@ export function initProgress() {
 	// event listener can only handle mouse events triggered inside this element
 	// if mouse was pressed inside bar, leave, then released outside the bar,
 	// 'mouseup' event will not be triggered, and progress bar will continue following the mouse even it isn't pressed
-
 	progress.addEventListener('mouseleave', function () { // when mouse leave progress bar, stop dragging
 		if (mouseDown) { // only handle this event when mouse pressed down on bar and leave without a 'mouse up'
 			mouseDown = false
 			audio.currentTime = progress.value
 		}
 	})
-
 
 	// touch-based progress bar dragging
 	progress.addEventListener('touchstart', function (event) {
@@ -156,47 +144,8 @@ export function pause() {
 		pauseBtn = createRoot(document.getElementsByClassName("pause")[0])
 	}
 	log.info("playback paused")
-	audio.pause()
-	pauseBtn.render(<LucidePlay />)
-}
-
-export function showPlaylist() {
-	if (playlistElm == undefined) initPlaylist()
-	else {
-		if (playlistElm.style.height == "70%") {
-			playlistElm.style.height = "0px"
-			playlistElm.style.padding = "0px"
-		}
-		else if (playlistElm.style.height == "0px") {
-			playlistElm.style.height = "70%"
-			playlistElm.style.padding = "10px"
-		}
-	}
-}
-
-export function initPlaylist() {
-	log.debug("init playlist")
-
-	let mouseOverList = false
-	let mouseOverBtn = true
-
-	playlistElm = document.querySelector('.playlist')
-	playlistElm.style.height = "70%"
-	playlistElm.style.padding = "10px"
-
-	playlistElm.addEventListener('mouseover', function () {
-		mouseOverList = true
-	})
-	playlistElm.addEventListener('mouseleave', function () {
-		mouseOverList = false
-	})
-	document.querySelector('.playlist-btn')?.addEventListener('mouseover', function () {
-		mouseOverBtn = true
-	})
-	document.querySelector('.playlist-btn')?.addEventListener('mouseleave', function () {
-		mouseOverBtn = false
-	})
-	window.addEventListener('click', function () {
-		if (!mouseOverList && !mouseOverBtn && playlistElm.style.height == "70%") showPlaylist()
-	});
+	try {
+		audio.pause()
+		pauseBtn.render(<LucidePlay />)
+	} catch (_) { }
 }

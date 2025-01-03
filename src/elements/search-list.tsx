@@ -1,4 +1,4 @@
-import { createRoot } from 'react-dom/client'
+import { createRoot, Root } from 'react-dom/client'
 import {
 	Table,
 	TableBody,
@@ -11,20 +11,21 @@ import { keyword } from "@/elements/menubar"
 import { addToPlaylist } from "@/backend/audio"
 import * as log from "@/lib/logger"
 import { compressName, getMMSS } from "@/lib/utils"
+import { Button } from '@/components/ui/button'
+import { LucideListPlus } from 'lucide-react'
+import "@/css/search-list.css"
 
 
-let searchArea: any;
+let searchAreaRoot: Root;
 
 export function SearchList() {
-	if (searchArea == undefined) {
-		searchArea = createRoot(document.getElementById('searchArea') as HTMLElement)
-	}
+	if (searchAreaRoot == undefined) searchAreaRoot = createRoot(document.getElementById('searchArea') as HTMLElement)
 	if (keyword != undefined) {
 		log.info(`searching: ${keyword}`)
 		fetch(`https://music.163.com/api/search/get?s=${keyword}&type=1&offset=0&limit=50`)
 			.then((response) => response.json())
 			.then((responseJson) => {
-				searchArea.render(ListResults(responseJson.result?.songs))
+				searchAreaRoot.render(ListResults(responseJson.result?.songs))
 			})
 	}
 }
@@ -36,7 +37,7 @@ export function ListResults(results: any) {
 		const result = results[index]
 		list.push(<TableRow key={result.id} onDoubleClick={() => addToPlaylist(result, true)}>
 			<TableCell className="font-bold">{compressName(result.name)}<br /><small>{listArtists(result.artists)}</small></TableCell>
-			<TableCell>{getMMSS(result.duration/1000)}</TableCell>
+			<TableCell><Button className="add-song" onClick={() => addToPlaylist(result, false)}><LucideListPlus /></Button>{getMMSS(result.duration/1000)}</TableCell>
 		</TableRow>)
 	}
 	return (
