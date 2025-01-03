@@ -1,3 +1,5 @@
+<img height=100 width=100 src="./Dashline.png">
+
 # Dashline
 
 **STILL IN EARLY DEVELOPMENT STAGE!!!**
@@ -17,6 +19,6 @@ pnpm start
 pnpm build
 
 # build for android
-pnpm android build
+pnpm tauri android build
 
 ```
